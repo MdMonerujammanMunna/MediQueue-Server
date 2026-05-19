@@ -50,7 +50,11 @@ async function run() {
             const result = await dataCollection.findOne({ _id: new ObjectId(id) })
             res.json(result)
         })
-
+        // All data
+        app.get("/TutorsLimit", async (req, res) => {
+            const result = await dataCollection.find().limit(6).toArray()
+            res.json(result)
+        })
 
 
         await client.db("admin").command({ ping: 1 });
