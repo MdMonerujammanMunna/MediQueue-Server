@@ -4,7 +4,7 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const express = require("express")
 const cors = require("cors")
 const dotenv = require("dotenv")
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 dotenv.config()
 const PORT = process.env.PORT
@@ -33,11 +33,24 @@ async function run() {
         const db = client.db("MediQueue")
         const dataCollection = db.collection("Tutors")
 
+        // Add data
         app.post("/AddTutors", async (req, res) => {
             const Data = req.body
             const result = await dataCollection.insertOne(Data)
             res.json(result)
         })
+        // All data
+        app.get("/Tutors", async (req, res) => {
+            const result = await dataCollection.find().toArray()
+            res.json(result)
+        })
+        // Details page
+        app.get("/AllTutorPage/:id", async (req, res) => {
+            const { id } = req.params
+            const result = await dataCollection.findOne({ _id: new ObjectId(id) })
+            res.json(result)
+        })
+
 
 
         await client.db("admin").command({ ping: 1 });
