@@ -5,6 +5,7 @@ const express = require("express")
 const cors = require("cors")
 const dotenv = require("dotenv")
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { useId } = require("react");
 const app = express()
 dotenv.config()
 const PORT = process.env.PORT
@@ -62,7 +63,21 @@ async function run() {
             const result = await bookingCollection.insertOne(Data)
             res.json(result)
         })
+        // Booking data
+        app.get("/Bookingall", async (req, res) => {
+            const Data = req.body
+            const result = await bookingCollection.find().toArray()
+            res.json(result)
+        })
 
+        // My maked
+        app.get("/myMaked", async (req, res) => {
+            const userId = req.headers.uservalidid || req.headers['uservalidid'];
+
+            const result = await dataCollection.find({ SessionUserID: userId }).toArray()
+            res.json(result)
+            console.log(result)
+        })
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
