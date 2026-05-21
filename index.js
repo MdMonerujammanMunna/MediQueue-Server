@@ -115,6 +115,26 @@ async function run() {
             res.json(result)
             console.log(result)
         })
+        // Slot down
+        app.patch("/AllTutorPage/:id", async (req, res) => {
+
+            const { id } = req.params;
+            const { Slot } = req.body;
+            console.log(Slot)
+
+            const filter = { _id: new ObjectId(id) };
+
+            const updatedDoc = {
+                $set: {
+                    Slot: Slot
+                }
+            };
+
+            const result = await dataCollection.updateOne(filter, updatedDoc);
+
+            res.send(result);
+
+        })
         // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
