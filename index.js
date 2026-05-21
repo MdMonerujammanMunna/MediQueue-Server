@@ -32,23 +32,9 @@ const JWKS = createRemoteJWKSet(
     new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
 )
 
-const Varify = async (req, res, next) => {
-    const AuthValu = req?.headers.authorization;
-    if (!AuthValu) {
-        return res.status(401).json({ message: "Unauthorization" })
-    }
-    const Token = AuthValu.split(" ")[1]
-    if (!Token) {
-        return res.status(401).json({ message: "Unauthorization" })
-    }
-    try {
-        const { payload } = await jwtVerify(Token, JWKS)
-        next()
-    } catch (error) {
-        return res.status(403).json({ message: "Forbidden" })
-    }
+// const Varify = 
 
-}
+// }
 
 async function run() {
     try {
@@ -88,39 +74,69 @@ async function run() {
             res.json(result)
         })
         // Booking data done
-        app.get("/Bookingall", async (req, res) => {
+        app.get("/Bookingall", async (req, res, next) => {
+            const AuthValu = req.headers.authorization;
+            if (!AuthValu) {
+                return res.status(401).json({ message: "Unauthorization" })
+            }
+            const token = AuthValu.split(" ")[1];
+            if (!token) {
+                return res.status(401).json({ message: "Unauthorization" })
+            }
+            try {
+                const { payload } = await jwtVerify(token, JWKS)
+                next()
+            } catch (error) {
+                return res.status(403).json({ message: "Forbidden" })
+            }
+        }, async (req, res) => {
             const Data = req.body
             const result = await bookingCollection.find().toArray()
             res.json(result)
         })
 
         // My maked done
-        app.get("/myMaked", async (req, res) => {
-            const userId = req.headers.uservalidid || req.headers['uservalidid'];
-            const result = await dataCollection.find({ SessionUserID: userId }).toArray()
-            res.json(result)
-        })
+        app.get("/myMaked", async (req, res, next) => {
+            const AuthValu = req.headers.authorization;
+            if (!AuthValu) {
+                return res.status(401).json({ message: "Unauthorization" })
+            }
+            const token = AuthValu.split(" ")[1];
+            if (!token) {
+                return res.status(401).json({ message: "Unauthorization" })
+            }
+            try {
+                const { payload } = await jwtVerify(token, JWKS)
+                next()
+            } catch (error) {
+                return res.status(403).json({ message: "Forbidden" })
+            }
+        },
+            async (req, res) => {
+                const userId = req.headers.uservalidid || req.headers['uservalidid'];
+                const result = await dataCollection.find({ SessionUserID: userId }).toArray()
+                res.json(result)
+            })
         // Update done
         app.patch("/Tutors/:id", async (req, res) => {
             const { id } = req.params
             const updateData = req.body
             const result = await dataCollection.updateOne({ _id: new ObjectId(id) }, { $set: updateData })
             res.json(result)
-            console.log(result)
+            // console.log(result)
         })
         // Delect 
         app.delete("/Tutors/:id", async (req, res) => {
             const { id } = req.params
             const result = await dataCollection.deleteOne({ _id: new ObjectId(id) })
             res.json(result)
-            console.log(result)
+            // console.log(result)
         })
         // Slot down
         app.patch("/AllTutorPage/:id", async (req, res) => {
 
             const { id } = req.params;
             const { Slot } = req.body;
-            console.log(Slot)
 
             const filter = { _id: new ObjectId(id) };
 
@@ -129,11 +145,8 @@ async function run() {
                     Slot: Slot
                 }
             };
-
             const result = await dataCollection.updateOne(filter, updatedDoc);
-
             res.send(result);
-
         })
         // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
